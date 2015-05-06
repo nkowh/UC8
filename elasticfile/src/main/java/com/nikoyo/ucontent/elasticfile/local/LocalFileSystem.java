@@ -1,0 +1,51 @@
+package com.nikoyo.ucontent.elasticfile.local;
+
+
+import com.nikoyo.ucontent.elasticfile.Configuration;
+import com.nikoyo.ucontent.elasticfile.FileSystem;
+import com.nikoyo.ucontent.elasticfile.Utils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+
+import java.io.File;
+import java.io.IOException;
+
+public class LocalFileSystem implements FileSystem {
+
+    private final String root;
+
+    public LocalFileSystem() {
+        root = Configuration.UC_PROPERTIES.getProperty("fs.local.root");
+        for (int i = 0; i < 255; i++) {
+            String level1 = FilenameUtils.concat(root, String.format("%02X", i));
+            for (int j = 0; j < 255; j++) {
+                File level2 = new File(FilenameUtils.concat(level1, String.format("%02X", j)));
+                level2.mkdirs();
+            }
+        }
+    }
+
+    @Override
+    public String write(byte[] bytes) throws IOException {
+        File dest = buildFilePath(bytes);
+        if (!dest.exists()) FileUtils.writeByteArrayToFile(dest, bytes);
+        return dest.getAbsolutePath();
+    }
+
+    private File buildFilePath(byte[] bytes) throws IOException {
+        String crc32 = Utils.checksumCRC32(bytes);
+        String first2 = crc32.substring(0, 2);
+        String first4 = crc32.substring(2, 4);
+        return new File(FilenameUtils.concat(FilenameUtils.concat(FilenameUtils.concat(root, first2), first4), crc32));
+    }
+
+    @Override
+    public byte[] read(String location) {
+        try {
+            return FileUtils.readFileToByteArray(new File(location));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new byte[0];
+        }
+    }
+}
