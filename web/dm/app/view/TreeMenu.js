@@ -6,31 +6,37 @@ Ext.define('dm.view.TreeMenu', {
         expanded: true,
         children: [
             {
-                text: "文档", expanded: true, children: [
-                {text: "创建文档", ref: 'dm.view.document.Upload', leaf: true},
-                {text: "我的文档", ref: 'dm.view.document.MyDocument', leaf: true},
-                {text: "我的关注", ref: 'dm.view.document.MyFavorite', leaf: true},
-                {text: "全文搜索", ref: 'dm.view.document.FullTextSearch', leaf: true},
-                {text: "高级搜索", ref: 'dm.view.document.AdvSearch', leaf: true}
-            ]
-            },
-            {
-                text: "监控", expanded: true, children: [
-                {text: '集群', ref: 'dm.view.monitor.Cluster', leaf: true}
-            ]
-            },
-            {
-                text: "系统", expanded: true, children: [
-                {text: "用戶", ref: 'dm.view.system.Users', leaf: true},
-                {text: "组", ref: 'dm.view.system.Groups', leaf: true},
-                {text: "Schema", ref: 'dm.view.system.Schemas', leaf: true},
-                {text: "权限", ref: 'dm.view.system.Acls', leaf: true},
+                text: "文档", iconCls: 'fa-server', expanded: true, children: [
+                {text: "创建文档", iconCls: 'fa-cloud-upload', ref: 'dm.view.document.Upload', leaf: true},
                 {
-                    text: "高级", expanded: true, children: [
-                    {text: "初始化", ref: 'dm.view.system.Initialization', leaf: true},
-                    {text: "索引", leaf: true}
-                ]
+                    text: "我的文档",
+                    iconCls: 'fa-files-o',
+                    ref: 'dm.view.document.MyDocument',
+                    leaf: true
                 },
+                {text: "我的关注", iconCls: 'fa-tags', ref: 'dm.view.document.MyFavorite', leaf: true},
+                {text: "全文搜索", iconCls: 'fa-search', ref: 'dm.view.document.FullTextSearch', leaf: true},
+                {
+                    text: "高级搜索",
+                    icon: '<i class="fa fa-circle fa-stack-2x"></i><i class="fa fa-search fa-stack-1x fa-inverse"></i>',
+                    ref: 'dm.view.document.AdvSearch',
+                    leaf: true
+                }
+            ]
+            },
+            {
+                text: "监控", iconCls: 'fa-lightbulb-o', expanded: true, children: [
+                {text: '集群', iconCls: 'fa-th-large', ref: 'dm.view.monitor.Cluster', leaf: true}
+            ]
+            },
+            {
+                text: "系统", iconCls: 'fa-cog', expanded: true, children: [
+                {text: "用戶", iconCls: 'fa-user', ref: 'dm.view.system.Users', leaf: true},
+                {text: "组", iconCls: 'fa-users', ref: 'dm.view.system.Groups', leaf: true},
+                {text: "Schema", iconCls: 'fa-list-alt', ref: 'dm.view.system.Schemas', leaf: true},
+                {text: "权限", iconCls: 'fa-sliders', ref: 'dm.view.system.Acls', leaf: true},
+                {text: "初始化", iconCls: 'fa-eraser', ref: 'dm.view.system.Initialization', leaf: true}
+
             ]
             }
         ]
@@ -42,13 +48,19 @@ Ext.define('dm.view.TreeMenu', {
             var record = selected[0],
                 text = record.get('text'),
                 leaf = record.get('leaf'),
+                iconCls = record.get('iconCls'),
+                icon = record.get('icon'),
+                glyph = record.get('glyph'),
                 ref = record.get('ref');
             if (!leaf) return;
             var mainpanel = Ext.getCmp('mainpanel');
             mainpanel.removeAll(true);
             if (ref) {
+                var title = text
+                if (icon)title = '<span style="color: black;font-weight: bold" ><span class="fa-stack">' + icon + '</span><span style="font-size: larger">' + text + '</span><span>';
+                else if (iconCls)title = '<span style="color: black;font-weight: bold" ><span class="fa ' + iconCls + ' fa-lg fa-fw" ></span><span style="font-size: larger">' + text + '</span></span>';
                 mainpanel.add(Ext.create(ref, {
-                    title: text,
+                    title: title,
                     titleAlign: 'center'
                 }));
             } else {
@@ -121,6 +133,33 @@ Ext.define('dm.view.TreeMenu', {
                         itemId: 'forum'
                     }]
                 }
+            }],
+            columns: [{
+                xtype: 'treecolumn',
+                text: 'Name',
+                flex: 1,
+                dataIndex: me.displayField,
+                cellTpl: [
+                    '<tpl for="lines">',
+                    '<img src="{parent.blankUrl}" class="{parent.childCls} {parent.elbowCls}-img ',
+                    '{parent.elbowCls}-<tpl if=".">line<tpl else>empty</tpl>" role="presentation"/>',
+                    '</tpl>',
+                    '<img src="{blankUrl}" class="{childCls} {elbowCls}-img {elbowCls}',
+                    '<tpl if="isLast">-end</tpl><tpl if="expandable">-plus {expanderCls}</tpl>" role="presentation"/>',
+                    '<tpl if="checked !== null">',
+                    '<input type="button" {ariaCellCheckboxAttr}',
+                    ' class="{childCls} {checkboxCls}<tpl if="checked"> {checkboxCls}-checked</tpl>"/>',
+                    '</tpl>',
+                    '<tpl if="icon"><span role="presentation" class="fa-stack">{icon}</span><tpl elseif="iconCls"><span role="presentation"><i class="fa {iconCls} fa-lg fa-fw"></i></span><tpl else>',
+                    '<img src="{blankUrl}" role="presentation" class="{childCls} {baseIconCls} ',
+                    '{baseIconCls}-<tpl if="leaf">leaf<tpl else>parent</tpl> {iconCls}"',
+                    '<tpl if="icon">style="background-image:url({icon})"</tpl>/></tpl>',
+                    '<tpl if="href">',
+                    '<a href="{href}" role="link" target="{hrefTarget}" class="{textCls} {childCls}">{value}</a>',
+                    '<tpl else>',
+                    '<span class="{textCls} {childCls}">{value}</span>',
+                    '</tpl>'
+                ]
             }]
         })
 

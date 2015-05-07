@@ -65,10 +65,12 @@ Ext.define('dm.view.document.AdvCodition', {
             me.clearConditionField(combo, fieldset);
             var range = [{
                 xtype: 'combo',
+                width: 100,
                 value: 'from',
                 store: ['from', 'gt', 'gte']
             }, {allowBlank: false, xtype: 'textfield'}, {
                 xtype: 'combo',
+                width: 100,
                 value: 'to',
                 store: ['to', 'lt', 'lte']
             }, {allowBlank: false, xtype: 'textfield'}]
@@ -98,6 +100,7 @@ Ext.define('dm.view.document.AdvCodition', {
             xtype: 'container', layout: 'hbox', items: [
                 {
                     xtype: 'combo',
+                    width: 100,
                     value: 'must',
                     store: ['must', 'must_not']
                 }, {
@@ -106,6 +109,7 @@ Ext.define('dm.view.document.AdvCodition', {
                     store: me.fields
                 }, {
                     xtype: 'combo',
+                    width: 150,
                     value: 'term',
                     store: ['term', 'wildcard', 'prefix', 'fuzzy', 'range', 'query_string', 'text', 'missing'],
                     listeners: {

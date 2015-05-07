@@ -8,15 +8,18 @@ Ext.application({
         document.title = "uContent"
         Ext.onReady(function () {
             if (!Ext.util.Cookies.get('username') || !Ext.util.Cookies.get('service')) {
-                var login = Ext.create('Ext.window.Window', {
-                    title: 'uContent DM', titleAlign: 'center', closable: false, modal: true, items: [
+                var random = Ext.Number.randomInt(0, 4);
+                Ext.create('Ext.container.Viewport', {
+                    layout: 'center',
+                    items: [
                         Ext.create('dm.view.Login')
-                    ]
+                    ],
+                    style: {
+                        'background-image': 'url("../lib/images/BingWallpaper-' + random + '.jpg")'
+                    }
                 });
-                login.on('close', function () {
-                    Ext.create('dm.Viewport');
-                });
-                login.show();
+
+
             } else {
                 Ext.create('dm.Viewport');
             }

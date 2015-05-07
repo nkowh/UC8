@@ -155,7 +155,7 @@ Ext.define('dm.view.document.Upload', {
             Ext.apply(values, {
                 _acl: aclCombo.getValue(),
                 _createBy: Ext.util.Cookies.get("username"),
-                _createAt: Ext.Date.format(new Date(),"Y-m-d H:i:s")
+                _createAt: Ext.Date.format(new Date(),'Y-m-d\\TH:i:s')
             });
             var metadatafield = me.down('hiddenfield[name=metadata]');
             metadatafield.setValue(Ext.encode(values));

@@ -3,7 +3,8 @@ Ext.define('dm.view.Login', {
     frame: true,
     width: 420,
     bodyPadding: 10,
-
+    title: 'uContent DM',
+    shadowOffset: 10,
     defaultType: 'textfield',
 
     items: [
@@ -34,12 +35,19 @@ Ext.define('dm.view.Login', {
         {
             text: '进入',
             handler: function () {
+                var me = this;
+                var mask = Ext.create('Ext.LoadMask', {
+                    msg: '进入...',
+                    target: me.up('viewport')
+                });
+                mask.show();
                 var service = this.up('form').down('textfield[name=service]').getValue();
                 var username = this.up('form').down('textfield[name=username]').getValue();
                 var password = this.up('form').down('textfield[name=password]').getValue();
                 Ext.util.Cookies.set("service", service);
                 Ext.util.Cookies.set("username", username);
-                this.up('window').close();
+                window.location.reload();
+
             }
         }
     ],
