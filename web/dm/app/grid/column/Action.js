@@ -1,7 +1,7 @@
 Ext.define('dm.grid.column.Action', {
     extend: 'Ext.grid.column.Action',
 
-
+    align: 'center',
     defaultRenderer: function (v, cellValues, record, rowIdx, colIdx, store, view) {
         var me = this,
             prefix = Ext.baseCSSPrefix,
@@ -32,7 +32,7 @@ Ext.define('dm.grid.column.Action', {
                 item.hasActionConfiguration = true;
             }
 
-            ret += '<span class="fa fa-circle fa-2x"></span><span ' +
+            ret += '<span role="button" style="' + item.style + '" alt="' + (item.altText || me.altText) + '" src="' + (item.icon || Ext.BLANK_IMAGE_URL) +
             '" class="' + me.actionIconCls + ' ' + prefix + 'action-col-' + String(i) + ' ' + (disabled ? prefix + 'item-disabled' : ' ') +
             (Ext.isFunction(item.getClass) ? item.getClass.apply(item.scope || scope, arguments) : (item.iconCls || me.iconCls || '')) + '"' +
             (tooltip ? ' data-qtip="' + tooltip + '"' : '') + ' ></span>';
