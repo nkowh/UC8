@@ -12,8 +12,8 @@ Ext.define('dm.view.Login', {
             allowBlank: false,
             fieldLabel: 'Service',
             name: 'service',
-            value: 'http://192.168.1.138:9200/dm',
-            emptyText: 'http://192.168.1.138:9200/dm'
+            value: window.location.protocol + '//' + window.location.hostname + ':' + window.location.port + '/dm',
+            emptyText: 'http://192.168.1.90:9200/dm'
         },
         {
             allowBlank: false,
@@ -36,29 +36,54 @@ Ext.define('dm.view.Login', {
             text: '进入',
             handler: function () {
                 var me = this;
-                var mask = Ext.create('Ext.LoadMask', {
-                    msg: '进入...',
-                    target: me.up('viewport')
+                var form = me.up('form');
+                var values = me.up('form').getForm().getValues();
+                Ext.Ajax.request({
+                    url: values.service + '/users/' + values.username,
+                    callback: function (options, success, response) {
+                        if (!success) {
+                            form.toast(response.responseText);
+                            return;
+                        }
+                        var result = Ext.decode(response.responseText);
+                        if (!result.found || result._source.password !== values.password) {
+                            form.toast('用户名或密码不正确');
+                            return;
+                        }
+                        var mask = Ext.create('Ext.LoadMask', {
+                            msg: '进入...',
+                            target: me.up('viewport')
+                        });
+                        mask.show();
+                        Ext.util.Cookies.set("service", values.service);
+                        Ext.util.Cookies.set("username", values.username);
+                        window.location.reload();
+                    }
                 });
-                mask.show();
-                var service = this.up('form').down('textfield[name=service]').getValue();
-                var username = this.up('form').down('textfield[name=username]').getValue();
-                var password = this.up('form').down('textfield[name=password]').getValue();
-                Ext.util.Cookies.set("service", service);
-                Ext.util.Cookies.set("username", username);
-                window.location.reload();
 
             }
         }
     ],
 
     initComponent: function () {
+
+
         this.defaults = {
             anchor: '100%',
             labelWidth: 120
         };
 
         this.callParent();
+    },
+
+    toast: function (html) {
+        Ext.toast({
+            html: html,
+            closable: false,
+            align: 't',
+            slideInDuration: 400,
+            minWidth: 400
+        });
     }
 
 });

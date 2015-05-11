@@ -31,7 +31,7 @@ Ext.define('dm.view.document.FullTextSearch', {
                     me.mask('loading');
                     dm.model.system.User.load(Ext.util.Cookies.get('username'), {
                         callback: function (user, operation, success) {
-                            me.unmask();
+                            me.unmask &&  me.unmask()
                             if (!success)return;
                             me.user = user;
                         }
@@ -164,7 +164,7 @@ Ext.define('dm.view.document.FullTextSearch', {
                     menuDisabled: true,
                     widget: {
                         xtype: 'button',
-                        scale:'medium',
+                        scale: 'medium',
                         glyph: 0xf06e,
                         handler: function () {
                             if (!this.getWidgetRecord) return;

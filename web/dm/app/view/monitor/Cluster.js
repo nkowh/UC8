@@ -1,7 +1,7 @@
 Ext.define('dm.view.monitor.Cluster', {
     extend: 'Ext.grid.Panel',
     //title: { xtype:'title',text: '集群信息',textAlign:'center'},
-    titleAlign:'center',
+    titleAlign: 'center',
     selModel: 'rowmodel',
     initComponent: function () {
         var me = this;
@@ -76,9 +76,11 @@ Ext.define('dm.view.monitor.Cluster', {
 
     refresh: function () {
         var me = this;
+        var service = Ext.util.Cookies.get('service');
+
         if (me.xtype !== 'grid')me = me.up('grid');
         Ext.Ajax.request({
-            url: 'http://192.168.1.138:9200/_cluster/state',
+            url:  service.replace('/dm','')+ '/_cluster/state',
             success: function (response) {
                 var result = Ext.decode(response.responseText);
                 var master_node = result.master_node;

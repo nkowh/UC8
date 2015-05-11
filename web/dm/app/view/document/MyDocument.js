@@ -74,34 +74,34 @@ Ext.define('dm.view.document.MyDocument', {
 
                 var columns = [];
                 Ext.each(Ext.Array.sort(Ext.Array.unique(fields)), function (field) {
-                    if (Ext.Array.contains(['_contents', '_id', '_type', '_index','_acl','_score'], field))return;
+                    if (Ext.Array.contains(['_contents', '_id', '_type', '_index', '_acl', '_score'], field))return;
                     columns.push({
                         flex: 1,
                         text: field,
                         dataIndex: field
                     })
                 });
-                columns.push({
-                    xtype: 'widgetcolumn',
-                    sortable: false,
-                    menuDisabled: true,
-                    widget: {
-                        xtype: 'button',
-                        scale:'medium',
-                        glyph: 0xf06e,
-                        handler: function () {
-                            if (!this.getWidgetRecord) return;
-                            Ext.create('Ext.window.Window', {
-                                autoShow: true,
-                                layout: 'fit',
-                                maximized: true,
-                                resizable: false,
-                                items: [Ext.create('dm.view.document.ImageExplorer', {_id: this.getWidgetRecord().get('_id')})
-                                ]
-                            });
-                        }
+                Ext.Array.insert(columns, 0, [Ext.create('dm.grid.column.Action', {
+                        xtype: 'actioncolumn',
+                        sortable: false,
+                        scope: me,
+                        items: [{
+                            style: 'font-size:20px;color:Black;',
+                            iconCls: 'fa fa-file-image-o fa-lg',
+                            handler: function (grid, rowIndex) {
+                                Ext.create('Ext.window.Window', {
+                                    autoShow: true,
+                                    layout: 'fit',
+                                    maximized: true,
+                                    resizable: false,
+                                    items: [Ext.create('dm.view.document.ImageExplorer', {_id: grid.getStore().getAt(rowIndex).get('_id')})
+                                    ]
+                                });
+                            }
+                        }]
                     }
-                });
+                )]);
+
                 me.reconfigure(store, columns);
 
 

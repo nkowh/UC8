@@ -27,15 +27,16 @@ Ext.define('dm.view.system.Users', {
                         anchor: '100%'
                     }
                 },
-                {
+                Ext.create('dm.grid.column.Action',{
                     xtype: 'actioncolumn',
                     sortable: false,
                     scope: me,
                     items: [{
-                        icon: '../lib/icons/delete.png',
+                        style:'font-size:20px;color:DarkRed;',
+                        iconCls:'fa fa-remove',
                         handler: me.onRemoveClick
                     }]
-                }
+                })
             ],
             tools: [
                 {
