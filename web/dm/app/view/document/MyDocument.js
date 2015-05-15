@@ -1,116 +1,129 @@
 Ext.define('dm.view.document.MyDocument', {
     extend: 'Ext.grid.Panel',
-    selModel: 'rowmodel',
-    width: '100%',
-
     initComponent: function () {
-
-        Ext.apply(this, {
-            columns: [
-                {text: 'id', dataIndex: '_id', flex: 1},
+        var me = this;
+        Ext.apply(me, {
+            tbar: [
                 {
-                    text: 'highlight', dataIndex: 'highlight', flex: 1
-                }, {
-                    xtype: 'actioncolumn',
-                    flex: 1,
-                    sortable: false,
-                    menuDisabled: true,
-                    items: [
-                        {
-                            icon: '../lib/icons/delete.png',
-                            scope: this,
-                            handler: this.onRemoveClick
+                    xtype: 'container', items: [
+                    {
+                        xtype: 'breadcrumb',
+                        showIcons: true,
+                        listeners: {
+                            selectionchange: me.onSelectionchange
                         }
-                    ]
+                    },
+                    {xtype: 'button', glyph: 0xf093, handler: me.newFile, text: '上传文件'},
+                    {xtype: 'button', glyph: 0xf114, handler: me.newFolder, text: '新建文件夹'}
+
+                ]
                 }
             ],
-            tools: [
-                {
-                    type: 'refresh',
-                    callback: this.refresh
-                }
-            ]
-
+            listeners: {
+                itemclick: me.onItemClick
+            }
         });
-        this.callParent();
-        this.search();
+        me.callParent();
+        me.loadFolder();
     },
 
-    refresh: function () {
-        var me = this.xtype !== 'grid' ? this.up('grid') : this;
-        me.getStore().reload();
-    },
 
-    search: function (query) {
+    loadFolder: function (path) {
         var me = this;
-        var q = {
-            size: 50,
-            "query": {
-                term: {_createBy: Ext.util.Cookies.get("username")}
-            }
-        };
+        me.isloading = true;
         Ext.Ajax.request({
-            method: 'POST',
-            url: Ext.util.Cookies.get('service') + '/files/_search',
-            jsonData: q,
-            success: function (response, opts) {
-                var obj = Ext.decode(response.responseText);
+            method: 'GET',
+            url: Ext.util.Cookies.get('service') + '/folders/' + Ext.util.Cookies.get('username'),
+            callback: function (options, success, response) {
+                if (!success) return;
+                var userFolder = Ext.decode(response.responseText);
+                var fields = [{name: 'isFolder', type: 'bool'}, 'text', 'path', {name: '_lastModifyAt', type: 'date'}];
 
-                var data = [];
-                var fields = [];
-                Ext.each(obj.hits.hits, function (item) {
-                    var dest = {}
-                    Ext.apply(dest, item, item._source);
-                    delete dest._source;
-                    data.push(dest);
-                    fields = Ext.Array.merge(fields, Ext.Object.getKeys(dest));
-
+                var data = {text: 'root', path: 'root'};
+                me.buildFolderTree(data, userFolder._source.root);
+                var breadcrumbStore = Ext.create('Ext.data.TreeStore', {
+                    fields: fields,
+                    root: data
                 });
-
-                var store = Ext.create('Ext.data.Store', {
-                    fields: Ext.Array.unique(fields),
-                    data: data
-                });
-
-                var columns = [];
-                Ext.each(Ext.Array.sort(Ext.Array.unique(fields)), function (field) {
-                    if (Ext.Array.contains(['_contents', '_id', '_type', '_index', '_acl', '_score'], field))return;
-                    columns.push({
-                        flex: 1,
-                        text: field,
-                        dataIndex: field
-                    })
-                });
-                Ext.Array.insert(columns, 0, [Ext.create('dm.grid.column.Action', {
-                        xtype: 'actioncolumn',
-                        sortable: false,
-                        scope: me,
-                        items: [{
-                            style: 'font-size:20px;color:Black;',
-                            iconCls: 'fa fa-file-image-o fa-lg',
-                            handler: function (grid, rowIndex) {
-                                Ext.create('Ext.window.Window', {
-                                    autoShow: true,
-                                    layout: 'fit',
-                                    maximized: true,
-                                    resizable: false,
-                                    items: [Ext.create('dm.view.document.ImageExplorer', {_id: grid.getStore().getAt(rowIndex).get('_id')})
-                                    ]
-                                });
-                            }
-                        }]
-                    }
-                )]);
-
-                me.reconfigure(store, columns);
+                var breadcrumb = me.down('breadcrumb');
+                breadcrumb.setStore(breadcrumbStore);
+                if (path) {
+                    breadcrumb.setSelection(breadcrumbStore.findNode('path', path));
+                } else {
+                    breadcrumb.setSelection('root');
+                }
 
 
-            },
-            failure: function (response, opts) {
-                console.log('server-side failure with status code ' + response.status);
+                me.reconfigure(Ext.create('Ext.data.Store', {
+                    fields: fields,
+                    data: breadcrumb.getSelection().childNodes
+                }), [{
+                    text: '',
+                    dataIndex: 'isFolder'
+                }, {
+                    text: '文件名',
+                    xtype: 'templatecolumn',
+                    flex: 1,
+                    dataIndex: 'text',
+                    tpl: '<a href="javascript:void(0);">{text}</a>'
+                }, {
+                    text: '修改时间',
+                    flex: 1,
+                    xtype: 'datecolumn',
+                    format: 'Y-m-d H:i:s',
+                    dataIndex: '_lastModifyAt'
+                }]);
+                me.isloading = false;
             }
         });
 
+    },
+
+    onSelectionchange: function (view, node, eOpts) {
+        var me = this.up('grid');
+        if (!node || me.isloading)return;
+        me.loadFolder(node.get('path'));
+    },
+
+    buildFolderTree: function (parent, obj) {
+        var me = this;
+        parent.children = [];
+        Ext.each(Ext.Object.getAllKeys(obj), function (key) {
+            if (Ext.Array.contains(['_files', '_lastModifyAt'], key))return;
+            var child = {
+                isFolder: true,
+                text: key,
+                path: parent.path + '.' + key,
+                _lastModifyAt: obj[key]._lastModifyAt
+            };
+            parent.children.push(child);
+            me.buildFolderTree(child, obj[key]);
+        });
+    },
+
+    newFile: function () {
+
+
+    },
+
+
+    newFolder: function () {
+        var me = this.up('grid');
+        var breadcrumb = me.down('breadcrumb');
+        var parent = breadcrumb.getSelection() ? breadcrumb.getSelection().get('path') : 'root';
+        Ext.create('Ext.window.Window', {
+            autoShow: true,
+            title: '新建文件夹', closable: false, modal: true, items: [
+                Ext.create('dm.view.document.NewFolder', {parent: parent})
+            ]
+        });
+    },
+
+    onItemClick: function (view, record, item, index, e, eOpts) {
+        var me = this;
+        if (!record.get('isFolder'))return;
+        var breadcrumb = me.down('breadcrumb');
+        me.loadFolder(record.get('path'));
 
     }
 

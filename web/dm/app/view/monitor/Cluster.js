@@ -20,22 +20,19 @@ Ext.define('dm.view.monitor.Cluster', {
                     xtype: 'combo',
                     store: [0, 1, 2, 3]
                 },
-                //{
-                //    fieldLabel: '分片数量',
-                //    name: 'number_of_shards',
-                //    xtype: 'combo',
-                //    store: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-                //},
                 {
                     xtype: 'button',
                     text: '应用',
                     handler: me.applySetting
                 }
-            ]
+            ],
+            listeners: {
+                //rowdblclick: me.rowdblclick
+            }
         });
         me.callParent();
         me.initSettings();
-        me.refresh()
+        me.refresh();
 
 
     },
@@ -80,7 +77,7 @@ Ext.define('dm.view.monitor.Cluster', {
 
         if (me.xtype !== 'grid')me = me.up('grid');
         Ext.Ajax.request({
-            url:  service.replace('/dm','')+ '/_cluster/state',
+            url: service.replace('/dm', '') + '/_cluster/state',
             success: function (response) {
                 var result = Ext.decode(response.responseText);
                 var master_node = result.master_node;
@@ -131,14 +128,19 @@ Ext.define('dm.view.monitor.Cluster', {
                             '</tpl></tpl>'
                         })
                     } else if (field === 'isMaster') {
-                        columns.push({
-                            flex: 1,
+                        columns.push(Ext.create('dm.grid.column.Action', {
                             align: 'center',
-                            xtype: 'templatecolumn',
-                            text: field,
+                            sortable: false,
                             dataIndex: field,
-                            tpl: '<tpl if="isMaster"><span class="fa fa-circle fa-2x"></span><tpl else><span class="fa fa-circle-o fa-2x"></tpl>'
-                        })
+                            items: [{
+                                style: 'font-size:40px',
+                                getClass: function (v, metadata, r, rowIndex, colIndex, store) {
+                                    return v ? 'fa fa-star fa-2x' : 'fa fa-circle-o fa-2x'
+                                },
+                                handler: me.rowdblclick
+                            }]
+                        }));
+
                     } else {
                         columns.push({
                             flex: 2,
@@ -152,8 +154,39 @@ Ext.define('dm.view.monitor.Cluster', {
                 me.reconfigure(store, columns);
             }
         });
+    },
+
+
+
+    rowdblclick: function (view, rowIndex, colIndex, item, e, record) {
+        var me = this.up('grid');
+        var service = Ext.util.Cookies.get('service');
+        var nodeId = record.get('id');
+        Ext.Ajax.request({
+            url: service.replace('/dm', '') + '/_nodes/' + nodeId,
+            callback: function (options, success, response) {
+                if (!success) return;
+                var result = Ext.decode(response.responseText);
+
+                Ext.create('Ext.window.Window', {
+                    title: record.get('name'),
+                    autoShow: true,
+                    layout: 'fit',
+                    height: 500,
+                    width: 600,
+                    scrollable: true,
+                    layout: 'fit',
+                    items: [Ext.create('dm.tree.CodeTree', {
+                        rootVisible: false,
+                        code:  result.nodes[nodeId]
+                    })]
+                });
+            }
+        });
+
 
     }
 
 
-});
+})
+;

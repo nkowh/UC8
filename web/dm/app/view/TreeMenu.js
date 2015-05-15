@@ -26,7 +26,9 @@ Ext.define('dm.view.TreeMenu', {
             },
             {
                 text: "监控", iconCls: 'fa-lightbulb-o', expanded: true, children: [
-                {text: '集群', iconCls: 'fa-th-large', ref: 'dm.view.monitor.Cluster', leaf: true}
+                {text: '副本', iconCls: 'fa-th-large', ref: 'dm.view.monitor.Cluster', leaf: true},
+                {text: '节点', iconCls: 'fa-line-chart', ref: 'dm.view.monitor.Nodes', leaf: true},
+                {text: '语句分析', iconCls: 'fa-lightbulb-o', ref: 'dm.view.monitor.Analyzer', leaf: true}
             ]
             },
             {

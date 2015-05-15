@@ -28,7 +28,6 @@ Ext.define('dm.view.system.Users', {
                     }
                 },
                 Ext.create('dm.grid.column.Action',{
-                    xtype: 'actioncolumn',
                     sortable: false,
                     scope: me,
                     items: [{
