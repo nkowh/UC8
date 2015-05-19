@@ -18,6 +18,7 @@ Ext.define('dm.view.document.AdvSearch', {
             size: 50,
             "query": query
         };
+        me.query = q;
         Ext.Ajax.request({
             method: 'POST',
             url: Ext.util.Cookies.get('service') + '/files/_search',
@@ -56,7 +57,7 @@ Ext.define('dm.view.document.AdvSearch', {
                     menuDisabled: true,
                     widget: {
                         xtype: 'button',
-                        scale:'medium',
+                        scale: 'medium',
                         glyph: 0xf06e,
                         handler: function () {
                             if (!this.getWidgetRecord) return;
@@ -72,7 +73,6 @@ Ext.define('dm.view.document.AdvSearch', {
                     }
                 });
                 me.reconfigure(store, columns);
-
 
             },
             failure: function (response, opts) {

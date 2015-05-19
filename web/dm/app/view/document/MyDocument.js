@@ -27,7 +27,6 @@ Ext.define('dm.view.document.MyDocument', {
         me.loadFolder();
     },
 
-
     loadFolder: function (path) {
         var me = this;
         me.isloading = true;
@@ -79,6 +78,36 @@ Ext.define('dm.view.document.MyDocument', {
 
     },
 
+    loadFiles: function (folderId) {
+        Ext.Ajax.request({
+            method: 'GET',
+            url: Ext.util.Cookies.get('service') + '/folderfile/' + folderId,
+            callback: function (options, success, response) {
+                if (!success) return;
+                var userFolder = Ext.decode(response.responseText);
+
+
+                var fields = [{name: 'isFolder', type: 'bool'}, 'text', 'path', {name: '_lastModifyAt', type: 'date'}];
+
+                var data = {text: 'root', path: 'root'};
+                me.buildFolderTree(data, userFolder._source.root);
+                var breadcrumbStore = Ext.create('Ext.data.TreeStore', {
+                    fields: fields,
+                    root: data
+                });
+                var breadcrumb = me.down('breadcrumb');
+                breadcrumb.setStore(breadcrumbStore);
+                if (path) {
+                    breadcrumb.setSelection(breadcrumbStore.findNode('path', path));
+                } else {
+                    breadcrumb.setSelection('root');
+                }
+
+                me.isloading = false;
+            }
+        });
+    },
+
     onSelectionchange: function (view, node, eOpts) {
         var me = this.up('grid');
         if (!node || me.isloading)return;
@@ -106,7 +135,6 @@ Ext.define('dm.view.document.MyDocument', {
 
     },
 
-
     newFolder: function () {
         var me = this.up('grid');
         var breadcrumb = me.down('breadcrumb');
@@ -126,6 +154,5 @@ Ext.define('dm.view.document.MyDocument', {
         me.loadFolder(record.get('path'));
 
     }
-
 
 });

@@ -16,9 +16,9 @@ public class LocalFileSystem implements FileSystem {
 
     public LocalFileSystem() {
         root = Configuration.UC_PROPERTIES.getProperty("fs.local.root");
-        for (int i = 0; i < 255; i++) {
+        for (int i = 0; i < 256; i++) {
             String level1 = FilenameUtils.concat(root, String.format("%02X", i));
-            for (int j = 0; j < 255; j++) {
+            for (int j = 0; j < 256; j++) {
                 File level2 = new File(FilenameUtils.concat(level1, String.format("%02X", j)));
                 level2.mkdirs();
             }

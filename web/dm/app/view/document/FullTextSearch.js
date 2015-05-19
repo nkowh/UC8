@@ -16,7 +16,17 @@ Ext.define('dm.view.document.FullTextSearch', {
                     scope: me,
                     handler: this.fulltextSearch
                 }
-            ]
+            ],
+            listeners: {
+                beforerender: function () {
+                    dm.model.system.User.load(Ext.util.Cookies.get('username'), {
+                        callback: function (user, operation, success) {
+                            if (!success)return;
+                            me.user = user;
+                        }
+                    });
+                }
+            }
         });
 
         me.callParent();

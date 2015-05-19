@@ -28,8 +28,6 @@ Ext.define('dm.grid.DocumentGrid', {
 
     search: function (q) {
         var me = this;
-        //me.mask && me.mask('loading');
-        //me.query = Ext.isObject(q) ? q : me.query;
         Ext.Ajax.request({
             method: 'POST',
             url: me.url ? me.url : Ext.util.Cookies.get('service') + '/files/_search',
@@ -56,7 +54,7 @@ Ext.define('dm.grid.DocumentGrid', {
 
                 var columns = [];
                 Ext.each(Ext.Array.sort(Ext.Array.unique(fields)), function (field) {
-                    if (Ext.Array.contains(['_contents', '_id', '_type', '_index', '_acl', '_score'], field))return;
+                    if (Ext.Array.contains(['_contents', '_id', '_type', '_index', '_acl', '_score','_version','found'], field))return;
                     columns.push({
                         flex: 1,
                         text: field,
@@ -84,49 +82,43 @@ Ext.define('dm.grid.DocumentGrid', {
                     }
                 )]);
 
-                columns.push({
-                    xtype: 'widgetcolumn',
-                    flex: 1,
+                columns.push(Ext.create('dm.grid.column.Action', {
                     sortable: false,
-                    menuDisabled: true,
-                    dataIndex: '_favorite',
-                    widget: {
-                        xtype: 'sliderwidget',
-                        minValue: 0,
-                        maxValue: 5,
-                        decimalPrecision: 0,
-                        listeners: {
-                            change: function (slider, value) {
-                                if (!slider.getWidgetRecord) return;
-                                var rec = slider.getWidgetRecord();
-                                if (!rec)return;
-                                var id = rec.get('_id');
-                                var favorite = Ext.isArray(me.user.get('favorite')) ? Ext.Array.clone(me.user.get('favorite')) : [];
-                                var favoriteItem = Ext.Array.findBy(favorite, function (item) {
-                                    return item.id === id;
-                                });
-                                if (value === 0) {
-                                    Ext.Array.remove(favorite, favoriteItem)
-                                }
-                                else {
-                                    if (favoriteItem)favoriteItem.score = value;
-                                    else favorite.push({id: id, score: value});
-                                }
-
-                                me.user.set('favorite', favorite);
-                                me.user.save();
-                            }
-                        }
-                    }
-                });
+                    scope: me,
+                    items: [{
+                        style: 'font-size:20px;color:#CC9900;',
+                        getClass: function (v, metadata, r, rowIndex, colIndex, store) {
+                            var has = Ext.Array.findBy(me.user.get('favorite'), function (f) {
+                                return f === r.get('_id');
+                            })
+                            return has ? 'fa fa-star' : 'fa fa-star-o';
+                        },
+                        handler: me.favorite
+                    }]
+                }));
                 me.reconfigure(store, columns);
 
             },
             failure: function (response, opts) {
-                //me.unmask && me.unmask()
                 console.log('server-side failure with status code ' + response.status);
             }
         });
+    },
+
+    favorite: function (grid, rowIndex, colIndex, item, e, record) {
+        var me = this;
+        var id = record.get('_id');
+        var favorite = Ext.isArray(me.user.get('favorite')) ? Ext.Array.clone(me.user.get('favorite')) : [];
+        if (Ext.Array.contains(favorite, id)) {
+            Ext.Array.remove(favorite, id);
+            e.target.className = e.target.className.replace('fa fa-star', 'fa fa-star-o');
+        } else {
+            favorite.push(id);
+            e.target.className = e.target.className.replace('fa fa-star-o', 'fa fa-star');
+        }
+        me.user.set('favorite', Ext.Array.unique(favorite));
+        me.user.save();
+
     }
 
 });

@@ -8,12 +8,12 @@ Ext.define('dm.view.TreeMenu', {
             {
                 text: "文档", iconCls: 'fa-server', expanded: true, children: [
                 {text: "创建文档", iconCls: 'fa-cloud-upload', ref: 'dm.view.document.Upload', leaf: true},
-                {
-                    text: "我的文档",
-                    iconCls: 'fa-files-o',
-                    ref: 'dm.view.document.MyDocument',
-                    leaf: true
-                },
+                //{
+                //    text: "我的文档",
+                //    iconCls: 'fa-files-o',
+                //    ref: 'dm.view.document.MyDocument',
+                //    leaf: true
+                //},
                 {text: "我的关注", iconCls: 'fa-tags', ref: 'dm.view.document.MyFavorite', leaf: true},
                 {text: "全文搜索", iconCls: 'fa-search', ref: 'dm.view.document.FullTextSearch', leaf: true},
                 {

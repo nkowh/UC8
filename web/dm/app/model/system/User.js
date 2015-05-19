@@ -5,6 +5,7 @@ Ext.define('dm.model.system.User', {
         {name: 'display', type: 'string', mapping: '_source.display'},
         {name: 'password', type: 'string', mapping: '_source.password'},
         {name:'favorite',type:'auto',mapping:'_source.favorite'},
+        {name:'search',type:'auto',mapping:'_source.search'},
         {name: 'createAt', type: 'date', dateFormat: 'time', mapping: '_source.createAt'}
     ],
     idProperty: '_id',

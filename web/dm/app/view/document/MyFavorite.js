@@ -11,22 +11,18 @@ Ext.define('dm.view.document.MyFavorite', {
                 });
             },
             listeners: {
-                afterrender: function () {
-                    me.mask('loading');
+                beforerender: function () {
+                    //me.mask('loading');
                     dm.model.system.User.load(Ext.util.Cookies.get('username'), {
                         callback: function (user, operation, success) {
-                            me.unmask();
+                            //me.unmask();
                             if (!success)return;
                             me.user = user;
-                            var ids = Ext.Array.map(Ext.Array.sort(me.user.get('favorite'), function (a, b) {
-                                if (a > b)return -1; else return 1;
-                            }), function (item) {
-                                return item.id
-                            });
+                            var ids = Ext.isArray(me.user.get('favorite')) ? me.user.get('favorite') : [];
                             me.query = {
                                 ids: ids
                             };
-                            me.search();
+                            if (ids.length > 0) me.search();
                         }
                     });
                 }
