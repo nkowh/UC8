@@ -7,7 +7,11 @@ Ext.define('dm.view.Login', {
     shadowOffset: 10,
     defaultType: 'textfield',
 
-    items: [
+    items: [{
+        xtype: 'component',
+        hidden: true,
+        id: 'qcode'
+    },
         {
             allowBlank: false,
             fieldLabel: 'Service',
@@ -28,6 +32,18 @@ Ext.define('dm.view.Login', {
             value: '123456',
             emptyText: 'password',
             inputType: 'password'
+        }
+    ],
+
+    tools: [
+        {
+            xtype: 'button',
+            glyph: 0xf029,
+            handler: function (button) {
+                var form = button.up('form');
+                var qrcode = form.down('component[id=qcode]');
+                qrcode.isHidden() ? qrcode.show() : qrcode.hide();
+            }
         }
     ],
 
@@ -65,6 +81,12 @@ Ext.define('dm.view.Login', {
         }
     ],
 
+    listeners: {
+        afterrender: function () {
+            new QRCode(document.getElementById("qcode"), window.location.href);
+        }
+    },
+
     initComponent: function () {
 
 
@@ -74,6 +96,8 @@ Ext.define('dm.view.Login', {
         };
 
         this.callParent();
+
+
     },
 
     toast: function (html) {

@@ -140,7 +140,7 @@ Ext.define('dm.view.document.Upload', {
             }, items: []
         }
     ],
-    errorReader: Ext.create('dm.data.reader.SubmitResultReader', {}),
+    //errorReader: Ext.create('dm.data.reader.SubmitResultReader', {}),
 
     buttons: [{
         text: 'Save',

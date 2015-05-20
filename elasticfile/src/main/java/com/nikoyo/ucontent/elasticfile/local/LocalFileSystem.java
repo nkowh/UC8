@@ -20,7 +20,8 @@ public class LocalFileSystem implements FileSystem {
             String level1 = FilenameUtils.concat(root, String.format("%02X", i));
             for (int j = 0; j < 256; j++) {
                 File level2 = new File(FilenameUtils.concat(level1, String.format("%02X", j)));
-                level2.mkdirs();
+                boolean res = level2.mkdirs();
+                if (!res) return;
             }
         }
     }
